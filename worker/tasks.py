@@ -5,8 +5,9 @@ from core import build_graph, MongoDBLogger
 from langchain_openai import ChatOpenAI
 
 # NOTE: Toggle to True when willing to use the OpenAI API. Preferably set to False when debugging the system to prevent
-# execution from wasting tokens.
-USE_LLM = False
+# execution from wasting tokens. This can be toggled in the `[dev/prod].env` file so that we do not need to manually
+# change this file.
+USE_LLM = os.getenv("USE_LLM")
 
 # load in the environment variables
 load_dotenv("secrets/dev.env")

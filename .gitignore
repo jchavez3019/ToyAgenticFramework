@@ -6,3 +6,5 @@ secrets/
 .idea/
 # Ignore VSCode configurations
 .vscode/
+# Ignore the .pem file for SSH'ing into the AWS EC2 instance
+*.pem

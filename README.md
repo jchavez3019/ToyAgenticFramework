@@ -49,3 +49,13 @@ To view the logs of all the containers in dev/prod:
 ```shell
 docker compose -f docker-compose.base.yml -f docker-compose.[dev/prod].yml logs -f
 ```
+
+To connect to the EC2 instance, use SSH:
+```shell
+ssh -i [your-key-pair-filename].pem ec2-user@[Public IPv4 Address]
+```
+For the key, it is also recommended to set its permissions using:
+```shell
+chmod 400 [your-key-pair-filename].pem
+```
+This ensures the file has read-only access to the user who created the file, and is not visible to any other users.
