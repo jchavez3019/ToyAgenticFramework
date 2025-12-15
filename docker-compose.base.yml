@@ -1,0 +1,81 @@
+# This is the base docker-compose yml file that is shared between dev and prod. This file will NOT work
+# as not all configurations are specified here. Please use the docker-compose.[dev/prod].yml file to add in the
+# additional necessary configuration attributes.
+services:
+  # ----------------------------------------------------
+  # 1. MongoDB Database Service (Optional, configured for DEV but not PROD)
+  # ----------------------------------------------------
+
+  # ----------------------------------------------------
+  # 2. Redis Message Broker Service (for Celery)
+  # ----------------------------------------------------
+  redis:
+    image: redis:latest
+    container_name: redis-broker
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - agent_network
+
+  # ----------------------------------------------------
+  # 3. FastAPI Web Application Service (API)
+  # ----------------------------------------------------
+  api:
+    build: . # use our docker file in the project
+    container_name: agent-api
+    # We use uvicorn to start up a server for our Fast API service.
+    # Host on 0.0.0.0 so that the server listens on all available network interfaces inside the container, i.e., the
+    # Docker bridge network.
+    # Listen to requests on port 8000.
+    command: uvicorn api.app:app --host 0.0.0.0 --port 8000
+    restart: always
+    ports:
+      - "8000:8000" # expose this port so that we can communicate with this API service on localhost
+    volumes:
+      - .:/app # Mounts the local code into the container for development
+    depends_on:
+      - redis # API only starts once Redis is running
+    # NOTE: env_file MUST be specified in the DEV/PROD configuration
+    environment:
+      # Inject environment variables from .env file (handled by FastAPI/uvicorn wrapper)
+      # For the container, we explicitly define the connection URIs based on the service names rather
+      # than using 'localhost' since we define our agent_network.
+      REDIS_URL: "redis://redis:6379/0" # Uses the service name 'redis' instead of 'localhost'
+    networks:
+      - agent_network
+
+  # ----------------------------------------------------
+  # 4. Celery Worker Service
+  # ----------------------------------------------------
+  worker:
+    build: . # use our docker file in the project
+    container_name: agent-worker
+    # The command to start the Celery worker.
+    # '-A worker.tasks' tells the program that the application is defined in the worker.tasks.py file.
+    # 'celery_app' is the name of the Celery object variable inside of the worker.tasks.py file.
+    # 'worker' tells the program to be in 'worker' mode, i.e., it should spin up processes or threads dedicated
+    # to consuming tasks from the broker (Redis in our setup).
+    command: celery -A worker.tasks:celery_app worker --loglevel=info
+    restart: always
+    volumes:
+      - .:/app
+    depends_on:
+      - api # Ensure API is running
+      - redis # CRITICAL: Worker MUST wait for Redis (the broker)
+    # NOTE: env_file MUST be specified in the DEV/PROD configuration
+    environment:
+      # Same URIs as API, using service names for internal communication
+      REDIS_URL: "redis://redis:6379/0"
+    networks:
+      - agent_network
+
+# Define the network and persistent volumes
+networks:
+  agent_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+#  mongo-data: # This volume stores your MongoDB data

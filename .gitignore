@@ -1,0 +1,8 @@
+# NEVER push API keys to Github
+secrets/
+# Ignore Python compiled file
+**/__pycache__/
+# Ignore PyCharm .idea files
+.idea/
+# Ignore VSCode configurations
+.vscode/

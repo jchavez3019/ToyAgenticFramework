@@ -1,0 +1,39 @@
+services:
+  # ----------------------------------------------------
+  # 1. MongoDB Database Service (Now we configure this container for local development purposes)
+  # ----------------------------------------------------
+  mongo:
+    image: mongo:latest
+    container_name: mongo-local
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    #    volumes:
+    #      # Optional: This ensures the data persists even if the container is removed
+    #      - mongo-data:/data/db
+    networks:
+      - agent_network
+
+  # ----------------------------------------------------
+  # 2. Redis Message Broker Service for Celery (already set up in the base .yml file)
+  # ----------------------------------------------------
+
+  # ----------------------------------------------------
+  # 3. FastAPI Web Application Service (API)
+  # ----------------------------------------------------
+  api:
+    depends_on:
+      - redis # API only starts once Redis is running
+      - mongo # API only starts once Mongo is running (we depend on local MongoDB container in dev)
+    env_file:
+      - secrets/dev.env # specifically, we want the MONGO_URI defined in the dev.env file
+
+  # ----------------------------------------------------
+  # 4. Celery Worker Service
+  # ----------------------------------------------------
+  worker:
+    env_file:
+      - secrets/dev.env # specifically, we want the MONGO_URI defined in the dev.env file

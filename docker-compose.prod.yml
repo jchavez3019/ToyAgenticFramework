@@ -1,0 +1,43 @@
+services:
+  # ----------------------------------------------------
+  # 1. Mongo DB Service
+  # ----------------------------------------------------
+  # We do not specify as we will use MongoDB Atlas in PROD.
+
+  # ----------------------------------------------------
+  # 2. Redis Message Broker Service
+  # ----------------------------------------------------
+  # Redis is identical, so we don't need to specify it here.
+  # It is inherited from docker-compose.dev.yml
+
+  # ----------------------------------------------------
+  # 3. FastAPI Web Application Service (API)
+  # ----------------------------------------------------
+  api:
+    env_file:
+      - secrets/prod.env # Use the PRODUCTION env file
+
+    # Override the dependency list to remove the local 'mongo' service
+    # Redis are still required.
+    depends_on:
+      - redis
+
+    # CRITICAL: Remove the development-only volume mount
+    # We only want the code copied at build time, not mounted live.
+    volumes: []
+
+  # ----------------------------------------------------
+  # 4. Celery Worker Service
+  # ----------------------------------------------------
+  worker:
+    env_file:
+      - secrets/prod.env # Use the PRODUCTION env file
+
+    # Override dependency list to remove the local 'mongo' service
+    # Only Redis is strictly necessary for the worker to function.
+    depends_on:
+      - api # Ensures the API is running
+      - redis
+
+    # CRITICAL: Remove the development-only volume mount
+    volumes: []
