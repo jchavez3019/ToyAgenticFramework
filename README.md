@@ -59,3 +59,10 @@ For the key, it is also recommended to set its permissions using:
 chmod 400 [your-key-pair-filename].pem
 ```
 This ensures the file has read-only access to the user who created the file, and is not visible to any other users.
+
+Set up certs using: 
+```shell
+docker compose -f docker-compose.base.yml -f docker-compose.prod.yml up --force-recreate --no-deps certbot
+```
+We only run the certbot container. --no-deps ensures only the cert container runs and closes, the dependencies should 
+not spin up. This is to generate the SSL certificates for the first time.
