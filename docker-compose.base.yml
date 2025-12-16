@@ -24,7 +24,7 @@ services:
   # ----------------------------------------------------
   api:
     build: . # use our docker file in the project
-    container_name: agent-api
+    container_name: api
     # We use uvicorn to start up a server for our Fast API service.
     # Host on 0.0.0.0 so that the server listens on all available network interfaces inside the container, i.e., the
     # Docker bridge network.
