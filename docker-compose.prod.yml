@@ -52,6 +52,8 @@ services:
       # Map ports 80 and 443 from host to container
       - "80:80"
       - "443:443"
+    networks:
+      - agent_network
     volumes:
       # Mount Nginx config file
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -62,6 +64,8 @@ services:
     image: certbot/certbot
     container_name: certbot
     command: certonly --webroot --webroot-path=/var/www/certbot --email j.chavez3019@gmail.com --agree-tos --no-eff-email -d api.jorgechavezuiuc.com
+    networks:
+      - agent_network
     volumes:
       # Mount a directory for webroot challenges
       - certbot_volumes:/etc/letsencrypt
