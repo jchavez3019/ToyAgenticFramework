@@ -85,12 +85,14 @@ def get_task_status(task_id: str):
             task_id=task_id,
             final_response=task_data.get("final_response"),
             status=status,
+            search_results=task_data.get("search_results", []),
         )
     else:
         response_data = TaskStatusOutput(
             task_id=task_id,
             final_response=None,
             status=status,
+            search_results = [],
         )
 
     return response_data
