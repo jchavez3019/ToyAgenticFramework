@@ -1,14 +1,27 @@
 import uuid
+import os
 from fastapi import FastAPI, status, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from .api_models import AgentExecuteInput, AgentExecuteOutput, TaskStatusOutput
 from worker.tasks import execute_agent_framework
 from core import MongoDBLogger
+from typing import *
 
 try:
     mongo_logger = MongoDBLogger()
 except ValueError:
     raise RuntimeError("MongoDB connection required for API status endpoint.")
 app = FastAPI(title="Toy Agentic Framework API")
+
+allowed_origins_string: str = os.getenv("ALLOWED_CORS_ORIGINS", "http://localhost")
+origins: List[str] = allowed_origins_string.split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post(
     "/v1/agent/execute/",
