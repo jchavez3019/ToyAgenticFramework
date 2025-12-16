@@ -45,9 +45,9 @@ services:
   nginx:
     image: nginx:stable-alpine
     container_name: nginx
-    # Depends on agent-api to ensure it starts after the API is ready
+    # Depends on api container to ensure it starts after the API is ready
     depends_on:
-      - agent-api
+      - api
     ports:
       # Map ports 80 and 443 from host to container
       - "80:80"
