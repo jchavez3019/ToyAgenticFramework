@@ -65,8 +65,15 @@ def get_task_status(task_id: str):
     task_data = mongo_logger.get_task_by_id(task_id)
 
     if task_data is None:
+        # FIXME:
+        #   Originally we would raise an exception, but it could be that the front-end queries so quickly that the
+        #   task_id simply has not been put into the database yet. We should figure out how to nicely handle this
+        #   scenario. For now, let's initialize the status to 'Unknown'.
         # the user passed a task id that does not exist in the database
-        raise HTTPException(status_code=404, detail=f"Task ID '{task_id}' not found.")
+        # raise HTTPException(status_code=404, detail=f"Task ID '{task_id}' not found.")
+        task_data = {
+            "status": "Unknown"
+        }
 
     status = task_data.get("status", "Unknown")
 
