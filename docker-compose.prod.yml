@@ -57,9 +57,9 @@ services:
     volumes:
       # Mount Nginx config file
       # Temp for generating certificates using Certbot
-#      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # - ./nginx/conf.d/temp_cert_only.conf:/etc/nginx/conf.d/default.conf:ro
       # Contains the full necessary configuration
-      - ./nginx/conf.d/temp_cert_only.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
       # Mount Certbot files (for certs)
       - ./certbot_www:/var/www/certbot
       - certbot_volumes:/etc/letsencrypt
